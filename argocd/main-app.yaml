@@ -1,0 +1,26 @@
+# Add this Application to cluster-deployment/apps/ (the app-of-apps root) to register Hermes.
+# It is kept here as the canonical definition; `root` in cluster-deployment is what applies it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Janne6565/hermes-deployment.git
+    targetRevision: main
+    path: overlays/main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes
+  syncPolicy:
+    # Fully automated: any commit to main (CI tag bump or manual manifest edit) reconciles onto
+    # the cluster with no manual step.
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

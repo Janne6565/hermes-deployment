@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hermes.jannekeipert.de
+      secretName: hermes-tls
+  rules:
+    - host: hermes.jannekeipert.de
+      http:
+        paths:
+          # Only what genuinely needs to be reachable from outside:
+          #   /api/v1/events/alert  — Grafana and SigNoz webhooks (shared-secret authenticated)
+          #   /api/v1/*             — the UI's own calls, and the Janus widget's digest poll
+          # The sidecar (8081) is not routable here or anywhere else.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes-backend
+                port:
+                  number: 8080
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes-backend
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes-frontend
+                port:
+                  number: 80

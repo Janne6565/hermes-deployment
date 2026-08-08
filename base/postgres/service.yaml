@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes-postgres
+  labels:
+    app.kubernetes.io/name: hermes
+    app.kubernetes.io/component: postgres
+spec:
+  # Headless: the StatefulSet addresses the single pod directly, and nothing outside the
+  # namespace has any business load-balancing to the database.
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: hermes
+    app.kubernetes.io/component: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
