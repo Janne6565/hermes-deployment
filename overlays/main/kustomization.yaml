@@ -14,7 +14,7 @@ images:
     newTag: main-5713f18
   - name: ghcr.io/janne6565/hermes-sidecar
     newName: ghcr.io/janne6565/hermes-sidecar
-    newTag: main-f696133
+    newTag: main-9c3e443
   - name: ghcr.io/janne6565/hermes-frontend
     newName: ghcr.io/janne6565/hermes-frontend
     newTag: main-b0aa0a2
