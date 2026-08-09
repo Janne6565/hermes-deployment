@@ -1,16 +1,18 @@
-# One host, three routers, because they need three different answers to "who may call this".
+# One host, two routers here, because they need different answers to "who may call this".
 #
-#   hermes          — the app and its API. Behind Authentik forward auth (see authentik.yaml).
-#   hermes-public   — the two endpoints that cannot survive an interactive login.
-#   hermes-outpost  — Authentik's own callback path, which must stay reachable or the
-#                     login it redirects to can never come back.
+#   hermes         — the app and its API. Behind Authentik forward auth (see authentik.yaml).
+#   hermes-public  — the two endpoints that cannot survive an interactive login.
+#
+# A third router for this host, /outpost.goauthentik.io, is published from the authentik
+# namespace (cluster-deployment/infrastructure/authentik-outpost-ingress.yaml) — see the
+# header of authentik.yaml for why it cannot live here.
 #
 # Traefik ranks routers by rule length, so the longer, more specific rules below win over
 # `/api` and `/` on the same host — no explicit priorities needed.
 #
 # TLS is declared once, on the protected router: cert-manager's ingress-shim only reacts to
-# the annotated Ingress, and Traefik keys its certificate store by SNI, so all three routers
-# on this host serve the same cert.
+# the annotated Ingress, and Traefik keys its certificate store by SNI, so every router on
+# this host serves the same cert.
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -93,26 +95,3 @@ spec:
                 name: hermes-backend
                 port:
                   number: 8080
----
-# Authentik redirects the browser back to https://hermes.jannekeipert.de/outpost.goauthentik.io/…
-# to plant the session cookie on this domain. Routing it into the outpost itself — and
-# emphatically *not* through the forward-auth middleware, which would be a redirect loop.
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: hermes-outpost
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: hermes.jannekeipert.de
-      http:
-        paths:
-          - path: /outpost.goauthentik.io
-            pathType: Prefix
-            backend:
-              service:
-                name: authentik-outpost
-                port:
-                  number: 80
