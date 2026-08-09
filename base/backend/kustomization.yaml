@@ -10,5 +10,6 @@ resources:
   - sealed-hermes-app-key.yaml
   - sealed-alert-webhook-secret.yaml
   - sealed-gmail-oauth.yaml
+  - sealed-outlook-oauth.yaml
   - sealed-ntfy-credentials.yaml
   - sealed-claude-oauth-token.yaml
