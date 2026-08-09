@@ -16,4 +16,4 @@ images:
     newTag: main-fecf400
   - name: ghcr.io/janne6565/hermes-frontend
     newName: ghcr.io/janne6565/hermes-frontend
-    newTag: latest
+    newTag: main-7042962
