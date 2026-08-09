@@ -24,10 +24,6 @@ spec:
         app.kubernetes.io/name: hermes
         app.kubernetes.io/component: backend
     spec:
-      # ghcr.io packages are private by default even from a public repo. Make the three
-      # hermes packages public and this whole block can go away.
-      imagePullSecrets:
-        - name: ghcr-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

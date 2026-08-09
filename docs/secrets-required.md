@@ -14,7 +14,6 @@ service-scoped API keys. Treat them accordingly.
 | `claude-oauth-token` | `token` | From `claude setup-token`. Bound to the Max account, ~1 year lifetime. |
 | `ntfy-credentials` | `token` | Bearer token for the publishing user on `ntfy.jannekeipert.de`. |
 | `alert-webhook-secret` | `token` | Shared secret Grafana and SigNoz send as `X-Hermes-Token`. |
-| `ghcr-pull-secret` | docker-registry | Pulls the images. Only needed while the ghcr.io packages are private. |
 
 ## Creating them
 
@@ -57,17 +56,9 @@ kubectl create secret generic alert-webhook-secret -n hermes --dry-run=client -o
   | kubeseal --format yaml > base/backend/sealed-alert-webhook-secret.yaml
 ```
 
-```sh
-# 7. Image pull secret — not sealed, because it holds no Hermes-specific secret and is the
-#    one thing that must exist before ArgoCD can start anything.
-kubectl create secret docker-registry ghcr-pull-secret -n hermes \
-  --docker-server=ghcr.io \
-  --docker-username=Janne6565 \
-  --docker-password="<github PAT with read:packages>"
-```
-
-Making the three `ghcr.io/janne6565/hermes-*` packages public removes the need for this one —
-drop the `imagePullSecrets` blocks from the two deployments if you do.
+The three `ghcr.io/janne6565/hermes-*` packages are public, so no image pull secret is needed.
+If that ever changes, add a `ghcr-pull-secret` docker-registry secret and an `imagePullSecrets`
+block to both deployments.
 
 Then add the generated files to `base/backend/kustomization.yaml`.
 
