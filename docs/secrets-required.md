@@ -12,7 +12,7 @@ service-scoped API keys. Treat them accordingly.
 | `hermes-app-key` | `encryption-key`, `admin-token` | AES key protecting the stored Google refresh token, and the single-user gate on `/api`. |
 | `gmail-oauth` | `client-id`, `client-secret` | Google OAuth **client** — identifies the app, not the account. The account itself is attached in-app via Sign in with Google. |
 | `claude-oauth-token` | `token` | From `claude setup-token`. Bound to the Max account, ~1 year lifetime. |
-| `ntfy-credentials` | `token` | Bearer token for the publishing user on `ntfy.jannekeipert.de`. |
+| `ntfy-credentials` | `token` | Bearer token for the `hermes` user on `ntfy.jannekeipert.de`, scoped write-only to `janus-mail` (house pattern: one user per publisher). Recreate with `ntfy user add hermes`, `ntfy access hermes janus-mail write`, `ntfy token add hermes` inside the ntfy pod. |
 | `alert-webhook-secret` | `token` | Shared secret Grafana and SigNoz send as `X-Hermes-Token`. |
 
 ## Current state
@@ -26,7 +26,7 @@ three are placeholders you need to replace:
 | `hermes-app-key` | ✅ generated — the admin token was written to `~/hermes-admin-token.txt` |
 | `alert-webhook-secret` | ✅ generated — read it back with the `kubectl get secret` recipe below |
 | `gmail-oauth` | ✅ real client sealed (project `hermes-triage-110372`) |
-| `ntfy-credentials` | ⚠️ empty — pushes will fail (harmless while `HERMES_SHADOW_MODE=true`) |
+| `ntfy-credentials` | ✅ real token sealed — ntfy user `hermes`, write-only on `janus-mail` |
 
 The Google Cloud project is **`hermes-triage-110372`** ("Hermes"), Gmail API enabled, consent
 screen in Testing with `jabbekeipert@gmail.com` as a test user. The OAuth client is a Web
