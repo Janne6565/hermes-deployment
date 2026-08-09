@@ -1,3 +1,17 @@
+# One host, three routers, because they need three different answers to "who may call this".
+#
+#   hermes          — the app and its API. Behind Authentik forward auth (see authentik.yaml).
+#   hermes-public   — the two endpoints that cannot survive an interactive login.
+#   hermes-outpost  — Authentik's own callback path, which must stay reachable or the
+#                     login it redirects to can never come back.
+#
+# Traefik ranks routers by rule length, so the longer, more specific rules below win over
+# `/api` and `/` on the same host — no explicit priorities needed.
+#
+# TLS is declared once, on the protected router: cert-manager's ingress-shim only reacts to
+# the annotated Ingress, and Traefik keys its certificate store by SNI, so all three routers
+# on this host serve the same cert.
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -5,6 +19,8 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # <namespace>-<middleware name>@kubernetescrd — the CRD reference format Traefik expects.
+    traefik.ingress.kubernetes.io/router.middlewares: hermes-authentik-forward-auth@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
@@ -15,10 +31,8 @@ spec:
     - host: hermes.jannekeipert.de
       http:
         paths:
-          # Only what genuinely needs to be reachable from outside:
-          #   /api/v1/events/alert  — Grafana and SigNoz webhooks (shared-secret authenticated)
-          #   /api/v1/*             — the UI's own calls, and the Janus widget's digest poll
-          # The sidecar (8081) is not routable here or anywhere else.
+          # The UI's own calls and anything else under /api. The sidecar (8081) is not
+          # routable here or anywhere else.
           - path: /api
             pathType: Prefix
             backend:
@@ -38,5 +52,67 @@ spec:
             backend:
               service:
                 name: hermes-frontend
+                port:
+                  number: 80
+---
+# No forward-auth middleware on this router, by design. Both paths carry their own,
+# stronger check and neither has a browser session to offer:
+#
+#   /api/v1/events/alert         — SigNoz and Grafana can only send a static header; the
+#                                  shared secret is compared in constant time.
+#   /api/v1/auth/google/callback — the browser arrives from Google's redirect and the
+#                                  single-use `state` parameter binds it to a flow Hermes
+#                                  actually started.
+#
+# Exact rather than Prefix: these are two endpoints, not two subtrees. The backend's own
+# ApiAccessFilter exempts exactly the same two paths, so a spoofed X-authentik-* header on
+# this router buys nothing — the filter never looks at headers for a path it skips.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-public
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hermes.jannekeipert.de
+      http:
+        paths:
+          - path: /api/v1/events/alert
+            pathType: Exact
+            backend:
+              service:
+                name: hermes-backend
+                port:
+                  number: 8080
+          - path: /api/v1/auth/google/callback
+            pathType: Exact
+            backend:
+              service:
+                name: hermes-backend
+                port:
+                  number: 8080
+---
+# Authentik redirects the browser back to https://hermes.jannekeipert.de/outpost.goauthentik.io/…
+# to plant the session cookie on this domain. Routing it into the outpost itself — and
+# emphatically *not* through the forward-auth middleware, which would be a redirect loop.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-outpost
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hermes.jannekeipert.de
+      http:
+        paths:
+          - path: /outpost.goauthentik.io
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-outpost
                 port:
                   number: 80

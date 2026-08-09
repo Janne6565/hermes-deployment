@@ -30,9 +30,9 @@ spec:
         fsGroup: 1000
       containers:
         # ---------------------------------------------------------------------------------
-        # triage-api — Gmail sync, rules, digest, ntfy, webhook intake, the REST API.
+        # backend — Gmail sync, rules, digest, ntfy, webhook intake, the REST API.
         # ---------------------------------------------------------------------------------
-        - name: triage-api
+        - name: backend
           image: ghcr.io/janne6565/hermes-backend
           ports:
             - name: http
@@ -124,7 +124,7 @@ spec:
 
         # ---------------------------------------------------------------------------------
         # claude-sidecar — classification. Holds an account-level Claude credential, binds to
-        # loopback, and has no Service and no Ingress. It is reachable only from triage-api,
+        # loopback, and has no Service and no Ingress. It is reachable only from backend,
         # over the pod's shared network namespace.
         # ---------------------------------------------------------------------------------
         - name: claude-sidecar
@@ -144,7 +144,7 @@ spec:
           # No liveness probe on purpose. /health reports 503 while the classifier is degraded
           # (credit exhausted, rate limited) — a state the backend already handles by falling back
           # to rules-only. Probing it would restart the pod on every degradation, turning a
-          # recoverable condition into an outage and taking triage-api down with it. Degradation
+          # recoverable condition into an outage and taking backend down with it. Degradation
           # is surfaced through the backend's /api/v1/health and the digest instead.
           resources:
             # I/O bound: it waits on the API, it does not compute.

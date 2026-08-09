@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: hermes
 resources:
   - ../../base
+  - authentik.yaml
   - ingress.yaml
 # CI (backend / sidecar / frontend repos) rewrites these tags and pushes; ArgoCD then auto-syncs.
 # The values below are placeholders until the first CI run publishes an image.
