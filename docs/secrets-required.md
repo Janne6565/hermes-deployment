@@ -25,8 +25,14 @@ three are placeholders you need to replace:
 | `hermes-db` | ✅ generated |
 | `hermes-app-key` | ✅ generated — the admin token was written to `~/hermes-admin-token.txt` |
 | `alert-webhook-secret` | ✅ generated — read it back with the `kubectl get secret` recipe below |
-| `gmail-oauth` | ⚠️ empty — the app starts and reports "no OAuth client configured" |
+| `gmail-oauth` | ✅ real client sealed (project `hermes-triage-110372`) |
 | `ntfy-credentials` | ⚠️ empty — pushes will fail (harmless while `HERMES_SHADOW_MODE=true`) |
+
+The Google Cloud project is **`hermes-triage-110372`** ("Hermes"), Gmail API enabled, consent
+screen in Testing with `jabbekeipert@gmail.com` as a test user. The OAuth client is a Web
+application whose only redirect URI is
+`https://hermes.jannekeipert.de/api/v1/auth/google/callback` — it must match character for
+character or the exchange fails.
 | `claude-oauth-token` | ✅ real token sealed — `SIDECAR_ENABLED=true` |
 
 To read a generated value back out of the cluster:
