@@ -10,7 +10,7 @@ resources:
 images:
   - name: ghcr.io/janne6565/hermes-backend
     newName: ghcr.io/janne6565/hermes-backend
-    newTag: main-92fa808
+    newTag: main-8d54c44
   - name: ghcr.io/janne6565/hermes-sidecar
     newName: ghcr.io/janne6565/hermes-sidecar
     newTag: main-93c74c1
