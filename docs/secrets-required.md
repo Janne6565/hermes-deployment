@@ -15,7 +15,38 @@ service-scoped API keys. Treat them accordingly.
 | `ntfy-credentials` | `token` | Bearer token for the publishing user on `ntfy.jannekeipert.de`. |
 | `alert-webhook-secret` | `token` | Shared secret Grafana and SigNoz send as `X-Hermes-Token`. |
 
-## Creating them
+## Current state
+
+All six are sealed into `base/backend/` and applied. Three hold real generated credentials;
+three are placeholders you need to replace:
+
+| Secret | State |
+|---|---|
+| `hermes-db` | ✅ generated |
+| `hermes-app-key` | ✅ generated — the admin token was written to `~/hermes-admin-token.txt` |
+| `alert-webhook-secret` | ✅ generated — read it back with the `kubectl get secret` recipe below |
+| `gmail-oauth` | ⚠️ empty — the app starts and reports "no OAuth client configured" |
+| `ntfy-credentials` | ⚠️ empty — pushes will fail (harmless while `HERMES_SHADOW_MODE=true`) |
+| `claude-oauth-token` | ⚠️ placeholder — `SIDECAR_ENABLED=false`, so classification is rules-only |
+
+To read a generated value back out of the cluster:
+
+```sh
+kubectl get secret alert-webhook-secret -n hermes -o jsonpath='{.data.token}' | base64 -d
+```
+
+To replace a placeholder, re-seal just that one and commit:
+
+```sh
+kubectl create secret generic claude-oauth-token -n hermes --dry-run=client -o yaml \
+  --from-literal=token="<from claude setup-token>" \
+  | kubeseal --controller-name sealed-secrets-controller --controller-namespace kube-system \
+      --format yaml --scope strict > base/backend/sealed-claude-oauth-token.yaml
+```
+
+Then flip `SIDECAR_ENABLED` back to `"true"` in `base/backend/configmap.yaml`.
+
+## Creating them from scratch
 
 ```sh
 # 1. Database

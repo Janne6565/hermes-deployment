@@ -5,3 +5,10 @@ resources:
   - deployment.yaml
   - service.yaml
   - networkpolicy.yaml
+  # SealedSecrets: ciphertext only, decryptable by this cluster's controller alone.
+  - sealed-hermes-db.yaml
+  - sealed-hermes-app-key.yaml
+  - sealed-alert-webhook-secret.yaml
+  - sealed-gmail-oauth.yaml
+  - sealed-ntfy-credentials.yaml
+  - sealed-claude-oauth-token.yaml

@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: claude-oauth-token
+  namespace: hermes
+spec:
+  encryptedData:
+    token: AgC29StUQShOWEQHFY7aG6QBU63uw56IwN6AaFn7pne79lD8uCiL3wcxRLz0p/fktn5ookB74FbzbaNaE+7Tcuz70IwpinDdLahZoddopW27JWUgSyQGP95gu+icEuVgMnAMMvCzP6VB5Nr+dgYqMp/GypQbh9W8Mar0Kh6VNlPF6A2K+AevKd/zEOGUbzYNzTyKmo4ytGJkt3Ky4SBewoNwflzuI+kpADkUL7So6C9O1CdLrF+sH9eDRI+QDtdcxYZ1psa41F9AHGFDQr7ejgabFYw7dp7/WYpoFTimwN/exGbAOuiwCyzLYpw0SNS/gRZsBTJ5VlQlecjUBj772BdAgBdtjuWCApzKYh8ViA+h32pVxuZ3wPcAlLHHM2+jP1Ci7FtTdpyNfdS6wlhQtKRP7dIUL2RA+kFnvLf2fvccm8dNQju51WgnYu8ynkjk/i7tFBAA7dWalY6A4CtWct70R7UF5ZvgIIrkcWpNVVpSlUWck55XTqlIzHA2R+Iu/tfPdAXIL78OmCVoZqwvck+5UPEUtBs/so0Dj1233ZuCAIJfHa59BlX9Q5By8DtwRvuJPE1bFZzuu9HRDqdGwIkKbQENw3EtN/133V4OMB+mvSLN+G+XzH5eP1dOLdetNAY47ZnJWfbri846+9LRpvUJs53b2KGLLGeahXTW7rM5x5n8auwc2xrcTmMbTJk9kmH52gvAyAAJ8KiqLW0chDLqqrhCfT/w+ANRADDMOHHZp1d5
+  template:
+    metadata:
+      name: claude-oauth-token
+      namespace: hermes
