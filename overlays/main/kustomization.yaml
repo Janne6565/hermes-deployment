@@ -17,4 +17,4 @@ images:
     newTag: main-f696133
   - name: ghcr.io/janne6565/hermes-frontend
     newName: ghcr.io/janne6565/hermes-frontend
-    newTag: main-55a0187
+    newTag: main-b0aa0a2
