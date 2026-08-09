@@ -1,5 +1,6 @@
-# Add this Application to cluster-deployment/apps/ (the app-of-apps root) to register Hermes.
-# It is kept here as the canonical definition; `root` in cluster-deployment is what applies it.
+# Registered in cluster-deployment/apps/hermes.yaml (with the matching AppProject in
+# cluster-deployment/projects/hermes.yaml) — `root` there is what actually applies it.
+# This copy is kept in sync as the canonical definition.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,9 +9,9 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: hermes
   source:
-    repoURL: https://github.com/Janne6565/hermes-deployment.git
+    repoURL: https://github.com/Janne6565/hermes-deployment
     targetRevision: main
     path: overlays/main
   destination:
