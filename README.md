@@ -51,10 +51,11 @@ it needs to "who may call this" (`overlays/main/ingress.yaml`):
 |---|---|---|
 | `hermes` | the app, `/api`, `/v3/api-docs` | Authentik forward auth — `hermes-users` group |
 | `hermes-public` | `/api/v1/events/alert`, `/api/v1/auth/google/callback` | none at the edge; each endpoint carries its own check |
-| `hermes-outpost` | `/outpost.goauthentik.io` | none — it *is* the login callback |
+| `authentik-outpost` (authentik ns) | `/outpost.goauthentik.io` | none — it *is* the login callback |
 
-The middleware and the Service pointing at Authentik's embedded outpost live in
-`overlays/main/authentik.yaml`. The Authentik-side provider, application and group gate are a
+The middleware lives in `overlays/main/authentik.yaml`. The outpost's own path is routed from the
+authentik namespace instead: routing it from here would need an ExternalName Service, which Traefik
+refuses by default — it then drops the router and the path falls through to the SPA's 404 page. The Authentik-side provider, application and group gate are a
 blueprint in `cluster-deployment/infrastructure/authentik-hermes-blueprint.yaml`.
 
 The `hermes-app-key/admin-token` still works as `X-Hermes-Token`, but **only against a router that
