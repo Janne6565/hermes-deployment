@@ -1,0 +1,57 @@
+# Authentik forward auth — the thing that actually keeps hermes.jannekeipert.de private.
+#
+# Every request to the protected router is held at Traefik while it asks Authentik's
+# embedded outpost whether this browser has a session. Unauthenticated requests never
+# reach a Hermes pod at all: they get a 302 to sso.jannekeipert.de. The Authentik-side
+# provider, application and the hermes-users group gate live in
+# cluster-deployment/infrastructure/authentik-hermes-blueprint.yaml.
+#
+# Two pieces are needed on this side:
+#   1. a Service pointing at the outpost, because it runs in the authentik namespace
+#   2. the Middleware itself, attached to the protected router via the ingress
+#      annotation `traefik.ingress.kubernetes.io/router.middlewares`
+---
+# The embedded outpost is served by the authentik server, not a separate Deployment.
+# ExternalName rather than a copy of the endpoints so this never goes stale when the
+# authentik chart reschedules or renames pods.
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-outpost
+  labels:
+    app.kubernetes.io/name: hermes
+spec:
+  type: ExternalName
+  externalName: authentik-server.authentik.svc.cluster.local
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: authentik-forward-auth
+  labels:
+    app.kubernetes.io/name: hermes
+spec:
+  forwardAuth:
+    address: http://authentik-server.authentik.svc.cluster.local/outpost.goauthentik.io/auth/traefik
+    # The outpost has to see the original host and scheme to build the right redirect
+    # back to hermes.jannekeipert.de after login.
+    trustForwardHeader: true
+    # Traefik copies exactly these from the outpost's response onto the request —
+    # overwriting anything the client sent under the same names, which is why the
+    # backend is allowed to treat X-authentik-username as proof on this router.
+    authResponseHeaders:
+      - X-authentik-username
+      - X-authentik-groups
+      - X-authentik-email
+      - X-authentik-name
+      - X-authentik-uid
+      - X-authentik-jwt
+      - X-authentik-meta-jwks
+      - X-authentik-meta-outpost
+      - X-authentik-meta-provider
+      - X-authentik-meta-app
+      - X-authentik-meta-version

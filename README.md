@@ -10,7 +10,7 @@ base/
 ├── postgres/   StatefulSet + headless Service + PVC (in the Velero regime)
 ├── backend/    Deployment (two containers), Service, ConfigMap, NetworkPolicy
 └── frontend/   Deployment + Service (nginx)
-overlays/main/  namespace, ingress, image tag pins
+overlays/main/  namespace, ingresses, Authentik forward auth, image tag pins
 argocd/         the Application (register it in cluster-deployment/apps/)
 docs/           secrets-required.md
 ```
@@ -21,8 +21,8 @@ docs/           secrets-required.md
 
 | Container | Port | Reachable from |
 |---|---|---|
-| `triage-api` | 8080 | The Service, and the Ingress under `/api` |
-| `claude-sidecar` | 8081 | **Only `triage-api`, over pod loopback** |
+| `backend` | 8080 | The Service, and the Ingress under `/api` |
+| `claude-sidecar` | 8081 | **Only `backend`, over pod loopback** |
 
 The sidecar holds an account-level Claude credential. It binds to `127.0.0.1`, has no `ports:`
 entry, no Service, and no Ingress path — three independent reasons nothing off-pod can reach it,
@@ -41,6 +41,29 @@ singletons, and a second replica would double-push.
 
 Step 3 is the point of the whole rollout: shadow mode classifies and stores everything but pushes
 nothing, so the labels can be judged before the service is allowed to interrupt you.
+
+## Access
+
+`hermes.jannekeipert.de` is one host with three Traefik routers, cut so that each gets the answer
+it needs to "who may call this" (`overlays/main/ingress.yaml`):
+
+| Router | Serves | Gate |
+|---|---|---|
+| `hermes` | the app, `/api`, `/v3/api-docs` | Authentik forward auth — `hermes-users` group |
+| `hermes-public` | `/api/v1/events/alert`, `/api/v1/auth/google/callback` | none at the edge; each endpoint carries its own check |
+| `hermes-outpost` | `/outpost.goauthentik.io` | none — it *is* the login callback |
+
+The middleware and the Service pointing at Authentik's embedded outpost live in
+`overlays/main/authentik.yaml`. The Authentik-side provider, application and group gate are a
+blueprint in `cluster-deployment/infrastructure/authentik-hermes-blueprint.yaml`.
+
+The `hermes-app-key/admin-token` still works as `X-Hermes-Token`, but **only against a router that
+has no forward-auth middleware**. Forward auth runs at Traefik, before the backend's own filter, so
+a token alone no longer gets a script through `hermes` — it gets a 302 to SSO.
+
+Nothing needs this today. When the Janus widget starts polling `/api/v1/digest/today`, give it a
+path on `hermes-public`: the backend's `ApiAccessFilter` does *not* exempt that path, so it stays
+token-gated exactly as it is now, just without the interactive redirect in front of it.
 
 ## Image tags
 

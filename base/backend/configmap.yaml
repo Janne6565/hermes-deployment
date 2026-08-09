@@ -17,7 +17,7 @@ data:
   SIDECAR_URL: "http://127.0.0.1:8081"
   SIDECAR_ENABLED: "true"
   NTFY_URL: "https://ntfy.jannekeipert.de"
-  NTFY_TOPIC: "janus-mail"
+  NTFY_TOPIC: "hermes-mail"
   DIGEST_SEND_TIME: "18:00"
   # Two years. The service stores sender, subject and a ~500-character snippet, so this is a real
   # amount of mail metadata to keep — the trade is that rule dry-runs, category shares and the
