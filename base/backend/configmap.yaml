@@ -6,9 +6,11 @@ metadata:
     app.kubernetes.io/name: hermes
 data:
   HERMES_TIMEZONE: "Europe/Berlin"
-  # Phase 3 default. Flip to "false" only after reviewing the shadow-mode classifications —
-  # this is the switch that lets the service interrupt you.
-  HERMES_SHADOW_MODE: "true"
+  # Live. This is the switch that lets the service interrupt you: with it false, a message the
+  # classifier calls "high" becomes an actual push to the phone. Flipping it back to "true" is the
+  # first thing to try if the notifications turn out to be wrong or too frequent — it silences the
+  # pushes without stopping the classification, so the labels keep accumulating for review.
+  HERMES_SHADOW_MODE: "false"
   # Must match a redirect URI registered on the Google OAuth client, character for character.
   GMAIL_REDIRECT_URI: "https://hermes.jannekeipert.de/api/v1/auth/google/callback"
   GMAIL_POST_CONNECT_REDIRECT: "/settings?connected=1"
@@ -17,6 +19,9 @@ data:
   NTFY_URL: "https://ntfy.jannekeipert.de"
   NTFY_TOPIC: "janus-mail"
   DIGEST_SEND_TIME: "18:00"
-  RETENTION_DAYS: "90"
+  # Two years. The service stores sender, subject and a ~500-character snippet, so this is a real
+  # amount of mail metadata to keep — the trade is that rule dry-runs, category shares and the
+  # backfill can all reason over a genuinely representative sample rather than one quarter.
+  RETENTION_DAYS: "730"
   QUIET_HOURS_ENABLED: "false"
   LOG_LEVEL: "INFO"
