@@ -27,7 +27,7 @@ three are placeholders you need to replace:
 | `alert-webhook-secret` | ✅ generated — read it back with the `kubectl get secret` recipe below |
 | `gmail-oauth` | ⚠️ empty — the app starts and reports "no OAuth client configured" |
 | `ntfy-credentials` | ⚠️ empty — pushes will fail (harmless while `HERMES_SHADOW_MODE=true`) |
-| `claude-oauth-token` | ⚠️ placeholder — `SIDECAR_ENABLED=false`, so classification is rules-only |
+| `claude-oauth-token` | ✅ real token sealed — `SIDECAR_ENABLED=true` |
 
 To read a generated value back out of the cluster:
 

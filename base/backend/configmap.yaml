@@ -13,10 +13,7 @@ data:
   GMAIL_REDIRECT_URI: "https://hermes.jannekeipert.de/api/v1/auth/google/callback"
   GMAIL_POST_CONNECT_REDIRECT: "/settings?connected=1"
   SIDECAR_URL: "http://127.0.0.1:8081"
-  # Rules-only until a real claude-oauth-token is sealed. With a placeholder token the sidecar
-  # starts but every classification would burn the full 30s timeout before failing, stalling the
-  # poll loop; disabling it here skips the call entirely. This is exactly the plan's phase 1.
-  SIDECAR_ENABLED: "false"
+  SIDECAR_ENABLED: "true"
   NTFY_URL: "https://ntfy.jannekeipert.de"
   NTFY_TOPIC: "janus-mail"
   DIGEST_SEND_TIME: "18:00"
