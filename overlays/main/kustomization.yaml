@@ -11,7 +11,7 @@ resources:
 images:
   - name: ghcr.io/janne6565/hermes-backend
     newName: ghcr.io/janne6565/hermes-backend
-    newTag: main-91db125
+    newTag: main-5f7ad99
   - name: ghcr.io/janne6565/hermes-sidecar
     newName: ghcr.io/janne6565/hermes-sidecar
     newTag: main-c4af0c5
