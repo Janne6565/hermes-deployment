@@ -1,0 +1,24 @@
+# Scraped by the in-cluster Grafana Alloy (observability namespace), which forwards to Grafana
+# Cloud. Alloy rewrites `job` to <namespace>/<service>, so this shows up as `hermes/hermes-backend`.
+#
+# Alloy only selects ServiceMonitors that carry `release` and do NOT carry
+# `app.kubernetes.io/part-of` (cluster-deployment/infrastructure/grafana-alloy.yaml). Never add
+# part-of here, and keep the `release` label even though no Prometheus release exists any more.
+#
+# The scrape reaches the pod only because networkpolicy.yaml lets alloy-metrics in on 8080.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hermes-backend
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+      app.kubernetes.io/component: backend
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 60s
+      scrapeTimeout: 10s

@@ -2,8 +2,9 @@
 #
 # The sidecar already binds to 127.0.0.1, so nothing off-pod can reach it regardless. This policy
 # makes the intent explicit at the cluster layer: the only ingress the backend pod accepts is
-# HTTP/8080 from Traefik and from other pods in the namespace. Traffic between containers in the
-# same pod never traverses the CNI, so intra-pod calls to 8081 are unaffected.
+# HTTP/8080 from Traefik, from other pods in the namespace, and from Grafana Alloy's metrics
+# collector (the /actuator/prometheus scrape, see servicemonitor.yaml). Traffic between containers
+# in the same pod never traverses the CNI, so intra-pod calls to 8081 are unaffected.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -23,6 +24,14 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
         - podSelector: {}
+        # One selector entry with both keys = AND: only the alloy-metrics pods, only in
+        # observability. Everything else in that namespace (SigNoz, the log shippers) stays out.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy-metrics
       ports:
         - protocol: TCP
           port: 8080

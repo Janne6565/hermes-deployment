@@ -4,6 +4,7 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - servicemonitor.yaml
   - networkpolicy.yaml
   # SealedSecrets: ciphertext only, decryptable by this cluster's controller alone.
   - sealed-hermes-db.yaml
